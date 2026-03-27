@@ -1,0 +1,260 @@
+
+
+DATABASE_URL="postgresql://postgres:dev12345@localhost:5432/restrodb"
+# .env file
+JWT_SECRET=67127c9e7fc7cb3ec38bfe2b7253fd3c8e3ef914ea4df025657bfb3658afeb80
+PORT=5000
+
+
+# 67127c9e7fc7cb3ec38bfe2b7253fd3c8e3ef914ea4df025657bfb3658afeb80
+
+
+
+# Create migration
+npx prisma migrate dev --name init
+
+# Generate Prisma Client
+npx prisma generate
+
+# Optional: Open Prisma Studio
+npx prisma studio
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  USER
+  PRIME_USER
+  PREMIUM_USER
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  TRIAL
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PageType {
+  HOME
+  ABOUT
+  MENU
+  CONTACT
+  GALLERY
+  CUSTOM
+}
+
+// 1️⃣ User Model - Core
+model User {
+  id                String            @id @default(uuid())
+  email             String            @unique
+  password          String
+  name              String
+  role              UserRole          @default(USER)
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  
+  subscriptionStart DateTime?
+  subscriptionEnd   DateTime?
+  maxWebsites       Int               @default(1)
+  
+  // Relations
+  activityLogs      ActivityLog[] 
+  restaurants       Restaurant[]
+  payments          Payment[]
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@map("users")
+}
+
+// 2️⃣ Restaurant Model - Core Website
+model Restaurant {
+  id                String            @id @default(uuid())
+  name              String
+  slug              String            @unique
+  tagline           String?
+  logo              String?
+  favicon           String?
+  coverImage        String?
+  
+  // All website content stored as JSON (flexible)
+  content           Json?             // Complete website data
+  
+  // Theme settings
+  theme             Json?             @default("{\"primary\":\"#3B82F6\",\"secondary\":\"#10B981\",\"font\":\"Inter\"}")
+  
+  // SEO
+  seoTitle          String?
+  seoDescription    String?
+  seoKeywords       String[]
+  
+  // Status
+  isPublished       Boolean           @default(false)
+  publishedAt       DateTime?
+  
+  // Relations
+  userId            String
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pages             Page[]
+  menuItems         MenuItem[]
+  faqs              FAQ[]
+  
+  // Contact info stored directly in JSON
+  contactInfo       Json?             // {phone, email, address, hours, social}
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@unique([userId, slug])
+  @@index([slug])
+  @@index([userId])
+  @@map("restaurants")
+}
+
+// 3️⃣ Pages Model - Multiple Pages
+model Page {
+  id                String            @id @default(uuid())
+  restaurantId      String
+  restaurant        Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  title             String
+  slug              String
+  pageType          PageType          @default(CUSTOM)
+  
+  // Page content as JSON
+  content           Json              // Complete page data with sections
+  
+  metaTitle         String?
+  metaDescription   String?
+  order             Int               @default(0)
+  isPublished       Boolean           @default(true)
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@unique([restaurantId, slug])
+  @@map("pages")
+}
+
+// 4️⃣ Menu Items
+model MenuItem {
+  id                String            @id @default(uuid())
+  restaurantId      String
+  restaurant        Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  name              String
+  description       String?
+  price             Decimal           @db.Decimal(10,2)
+  discountedPrice   Decimal?          @db.Decimal(10,2)
+  currency          String            @default("USD")
+  
+  category          String
+  subCategory       String?
+  tags              String[]
+  image             String?
+  
+  // Dietary info as JSON for flexibility
+  dietary           Json?             // {vegetarian: false, vegan: false, glutenFree: false, spicy: false}
+  
+  isAvailable       Boolean           @default(true)
+  preparationTime   Int?
+  ingredients       String[]
+  
+  order             Int               @default(0)
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([restaurantId, category])
+  @@map("menu_items")
+}
+
+// 5️⃣ FAQ Model
+model FAQ {
+  id                String            @id @default(uuid())
+  restaurantId      String
+  restaurant        Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  question          String
+  answer            String            @db.Text
+  category          String?
+  order             Int               @default(0)
+  isPublished       Boolean           @default(true)
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@map("faqs")
+}
+
+// 6️⃣ Payments/Subscriptions
+model Payment {
+  id                String            @id @default(uuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  amount            Decimal           @db.Decimal(10,2)
+  currency          String            @default("USD")
+  paymentMethod     String
+  transactionId     String            @unique
+  status            PaymentStatus     @default(PENDING)
+  
+  plan              String            // "prime", "premium"
+  duration          Int               // in months
+  
+  subscriptionStart DateTime
+  subscriptionEnd   DateTime
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@map("payments")
+}
+
+// 7️⃣ Activity Log (Optional - for admin)
+model ActivityLog {
+  id                String            @id @default(uuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  action            String
+  entityType        String
+  entityId          String?
+  details           Json?
+  
+  createdAt         DateTime          @default(now())
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+user role{
+  USER
+  ADMIN
+  SUPERADMIN
+}
