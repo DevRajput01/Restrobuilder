@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import axios from "@/lib/axios";
 
 // --- 1. Define Validation Schema ---
 const signupSchema = z.object({
@@ -38,25 +39,11 @@ export default function SignupPage() {
   const onSubmit = async (formData: SignupFormData) => {
     setError("");
     try {
-      const response = await fetch("http://localhost:5000/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-
-        
-        router.push("/login");
-      } else {
-        // Backend validation error or "User exists" error
-        setError(data.error || "Signup failed");
-      }
-    } catch (err) {
-      setError("Server is not responding. Ensure backend is running.");
+      const { data } = await axios.post("/api/auth/signup", formData);
+      localStorage.setItem("token", data.token);
+      router.push("/login");
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Server is not responding. Ensure backend is running.");
     }
   };
 

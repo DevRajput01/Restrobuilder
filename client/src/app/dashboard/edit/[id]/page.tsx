@@ -1,236 +1,14 @@
-// "use client";
-// import { useEffect, useState } from "react";
-// import { useParams, useRouter } from "next/navigation";
-// import axios from "axios";
-// import { 
-//   Save, ArrowLeft, Layout, Eye, Palette, Image as ImageIcon, Star, Plus, Trash2 
-// } from "lucide-react";
-
-// export default function FullRestaurantEditor() {
-//   const { id } = useParams();
-//   const router = useRouter();
-//   const [loading, setLoading] = useState(true);
-//   const [saving, setSaving] = useState(false);
-
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     tagline: "",
-//     coverImage: "",
-//     logo: "",
-//     slug: "",
-//     isPublished: true,
-//     theme: { primary: "#ea580c", font: "Inter" },
-//     contactInfo: { address: "", phone: "", email: "" },
-//     content: { 
-//       heroTitle: "", 
-//       aboutUs: "", 
-//       gallery: [""], 
-//       testimonials: [{ name: "", text: "", stars: 5 }] 
-//     }
-//   });
-
-//   useEffect(() => {
-//     const fetchDetails = async () => {
-//       try {
-//         const token = localStorage.getItem("token");
-//         const res = await axios.get(`http://localhost:5000/api/my-restaurants`, {
-//           headers: { Authorization: `Bearer ${token}` }
-//         });
-//         const current = res.data.find((r: any) => r.id === id);
-//         if (current) {
-//           setFormData({
-//             ...current,
-//             theme: current.theme || { primary: "#ea580c", font: "Inter" },
-//             contactInfo: current.contactInfo || { address: "", phone: "", email: "" },
-//             content: {
-//               heroTitle: current.content?.heroTitle || "",
-//               aboutUs: current.content?.aboutUs || "",
-//               gallery: current.content?.gallery || [""],
-//               testimonials: current.content?.testimonials || [{ name: "", text: "", stars: 5 }]
-//             }
-//           });
-//         }
-//       } catch (err) { console.error(err); } finally { setLoading(false); }
-//     };
-//     if (id) fetchDetails();
-//   }, [id]);
-
-//   // --- Dynamic Array Handlers ---
-
-//   // Gallery Helpers
-//   const addGalleryImage = () => {
-//     setFormData({
-//       ...formData,
-//       content: { ...formData.content, gallery: [...formData.content.gallery, ""] }
-//     });
-//   };
-
-//   const removeGalleryImage = (index: number) => {
-//     const newGallery = formData.content.gallery.filter((_, i) => i !== index);
-//     setFormData({
-//       ...formData,
-//       content: { ...formData.content, gallery: newGallery }
-//     });
-//   };
-
-//   // Testimonial Helpers
-//   const addTestimonial = () => {
-//     setFormData({
-//       ...formData,
-//       content: { 
-//         ...formData.content, 
-//         testimonials: [...formData.content.testimonials, { name: "", text: "", stars: 5 }] 
-//       }
-//     });
-//   };
-
-//   const removeTestimonial = (index: number) => {
-//     const newT = formData.content.testimonials.filter((_, i) => i !== index);
-//     setFormData({
-//       ...formData,
-//       content: { ...formData.content, testimonials: newT }
-//     });
-//   };
-
-//   const handleSave = async () => {
-//     setSaving(true);
-//     try {
-//       const token = localStorage.getItem("token");
-//       await axios.patch(`http://localhost:5000/api/restaurants/${id}`, formData, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       alert("Website Updated Successfully!");
-//     } catch (err) { alert("Failed to save."); } finally { setSaving(false); }
-//   };
-
-//   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-t-2 border-orange-600"></div></div>;
-
-//   return (
-//     <div className="min-h-screen bg-slate-50 pb-20">
-//       <nav className="sticky top-0 z-50 bg-white border-b px-6 py-4 flex items-center justify-between">
-//         <div className="flex items-center gap-4">
-//           <button onClick={() => router.push('/dashboard')} className="p-2 hover:bg-slate-100 rounded-full"><ArrowLeft size={20} /></button>
-//           <h1 className="font-bold text-xl">Design Your Website</h1>
-//         </div>
-//         <button onClick={handleSave} className="bg-orange-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:bg-orange-700 transition">
-//           <Save size={18} /> {saving ? "Saving..." : "Save Changes"}
-//         </button>
-//       </nav>
-
-//       <main className="max-w-6xl mx-auto mt-8 px-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-//         <div className="lg:col-span-8 space-y-6">
-          
-//           {/* Header & Hero */}
-//           <section className="bg-white p-8 rounded-3xl shadow-sm border">
-//             <h2 className="text-sm font-black uppercase text-slate-400 mb-6 flex items-center gap-2"><Layout size={16} /> Header & Hero</h2>
-//             <div className="space-y-4">
-//               <div className="grid grid-cols-2 gap-4">
-//                 <div className="space-y-1">
-//                   <label className="text-xs font-bold text-slate-500 ml-1">Restaurant Name</label>
-//                   <input className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none" placeholder="Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
-//                 </div>
-//                 <div className="space-y-1">
-//                   <label className="text-xs font-bold text-slate-500 ml-1">Hero Title</label>
-//                   <input className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none" placeholder="Hero Title" value={formData.content.heroTitle} onChange={(e) => setFormData({...formData, content: {...formData.content, heroTitle: e.target.value}})} />
-//                 </div>
-//               </div>
-//               <div className="space-y-1">
-//                 <label className="text-xs font-bold text-slate-500 ml-1">Cover Image URL</label>
-//                 <input className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none" placeholder="https://..." value={formData.coverImage} onChange={(e) => setFormData({...formData, coverImage: e.target.value})} />
-//               </div>
-//             </div>
-//           </section>
-
-//           {/* Gallery Section */}
-//           <section className="bg-white p-8 rounded-3xl shadow-sm border">
-//             <div className="flex items-center justify-between mb-6">
-//               <h2 className="text-sm font-black uppercase text-slate-400 flex items-center gap-2"><ImageIcon size={16} /> Gallery Images</h2>
-//               <button onClick={addGalleryImage} className="flex items-center gap-1 text-xs font-bold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-lg hover:bg-orange-100 transition">
-//                 <Plus size={14} /> Add Image
-//               </button>
-//             </div>
-//             <div className="space-y-3">
-//               {formData.content.gallery.map((url, idx) => (
-//                 <div key={idx} className="flex gap-2">
-//                   <input 
-//                     className="flex-1 p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none" 
-//                     placeholder="Image URL" 
-//                     value={url} 
-//                     onChange={(e) => {
-//                       const newGallery = [...formData.content.gallery];
-//                       newGallery[idx] = e.target.value;
-//                       setFormData({...formData, content: {...formData.content, gallery: newGallery}});
-//                     }} 
-//                   />
-//                   <button onClick={() => removeGalleryImage(idx)} className="p-3 text-slate-400 hover:text-red-500 transition">
-//                     <Trash2 size={20} />
-//                   </button>
-//                 </div>
-//               ))}
-//             </div>
-//           </section>
-
-//           {/* Testimonials */}
-//           <section className="bg-white p-8 rounded-3xl shadow-sm border">
-//             <div className="flex items-center justify-between mb-6">
-//               <h2 className="text-sm font-black uppercase text-slate-400 flex items-center gap-2"><Star size={16} /> Guest Reviews</h2>
-//               <button onClick={addTestimonial} className="flex items-center gap-1 text-xs font-bold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-lg hover:bg-orange-100 transition">
-//                 <Plus size={14} /> Add Review
-//               </button>
-//             </div>
-//             {formData.content.testimonials.map((t, idx) => (
-//               <div key={idx} className="relative space-y-3 mb-6 p-5 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl">
-//                 <button onClick={() => removeTestimonial(idx)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition">
-//                   <Trash2 size={18} />
-//                 </button>
-//                 <div className="w-1/2">
-//                   <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Guest Name</label>
-//                   <input className="w-full p-2 bg-white border rounded-lg outline-none" placeholder="John Doe" value={t.name} onChange={(e) => {
-//                     const newT = [...formData.content.testimonials];
-//                     newT[idx].name = e.target.value;
-//                     setFormData({...formData, content: {...formData.content, testimonials: newT}});
-//                   }} />
-//                 </div>
-//                 <div>
-//                   <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Review</label>
-//                   <textarea className="w-full p-2 bg-white border rounded-lg outline-none h-20" placeholder="Fantastic food..." value={t.text} onChange={(e) => {
-//                     const newT = [...formData.content.testimonials];
-//                     newT[idx].text = e.target.value;
-//                     setFormData({...formData, content: {...formData.content, testimonials: newT}});
-//                   }} />
-//                 </div>
-//               </div>
-//             ))}
-//           </section>
-//         </div>
-
-//         {/* Sidebar */}
-//         <div className="lg:col-span-4 space-y-6">
-//           <section className="bg-white p-6 rounded-3xl shadow-sm border">
-//             <h2 className="text-sm font-black uppercase text-slate-400 mb-4 flex items-center gap-2"><Palette size={16} /> Brand Color</h2>
-//             <div className="flex items-center gap-4">
-//                <input type="color" className="w-16 h-12 rounded-lg cursor-pointer bg-transparent" value={formData.theme.primary} onChange={(e) => setFormData({...formData, theme: {...formData.theme, primary: e.target.value}})} />
-//                <span className="font-mono text-sm text-slate-500 uppercase">{formData.theme.primary}</span>
-//             </div>
-//           </section>
-//           <a href={`/view/${formData.slug}`} target="_blank" className="flex items-center justify-center gap-2 w-full p-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition shadow-xl shadow-slate-200">
-//             <Eye size={18} /> View Live Site
-//           </a>
-//         </div>
-//       </main>
-//     </div>
-//   );
-// }
-
-
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import axios from "axios";
+import axios from "@/lib/axios";
 import {
   Save, ArrowLeft, Layout, Eye, Palette, Image as ImageIcon, Star, Plus, Trash2,
-  BookOpen, Link, Upload, X
+  BookOpen, Link, Upload, X, Phone, Mail, MapPin, Clock, Globe, HelpCircle, AlignLeft
 } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+
 
 export default function FullRestaurantEditor() {
   const { id } = useParams();
@@ -247,13 +25,20 @@ export default function FullRestaurantEditor() {
     slug: "",
     isPublished: true,
     theme: { primary: "#ea580c", font: "Inter" },
-    contactInfo: { address: "", phone: "", email: "" },
+    contactInfo: {
+      address: "",
+      phone: "",
+      email: "",
+      hours: { weekdays: "11:00 - 22:00", weekends: "09:00 - 23:00" },
+      social: { instagram: "", facebook: "", twitter: "" }
+    },
     content: {
       heroTitle: "",
       aboutUs: "",
       gallery: [""],
       testimonials: [{ name: "", text: "", stars: 5 }],
-      menuBook: {           // ✅ new
+      faqs: [{ question: "", answer: "" }],
+      menuBook: {
         title: "Our Menu",
         subtitle: "Freshly prepared with love",
         images: [] as string[],
@@ -267,20 +52,35 @@ export default function FullRestaurantEditor() {
     const fetchDetails = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get(`http://localhost:5000/api/my-restaurants`, {
+        const res = await axios.get(`/api/my-restaurants`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const current = res.data.find((r: any) => r.id === id);
         if (current) {
+          const ci = current.contactInfo || {};
           setFormData({
             ...current,
             theme: current.theme || { primary: "#ea580c", font: "Inter" },
-            contactInfo: current.contactInfo || { address: "", phone: "", email: "" },
+            contactInfo: {
+              address: ci.address || "",
+              phone: ci.phone || "",
+              email: ci.email || "",
+              hours: {
+                weekdays: ci.hours?.weekdays || "11:00 - 22:00",
+                weekends: ci.hours?.weekends || "09:00 - 23:00",
+              },
+              social: {
+                instagram: ci.social?.instagram || "",
+                facebook: ci.social?.facebook || "",
+                twitter: ci.social?.twitter || "",
+              },
+            },
             content: {
               heroTitle: current.content?.heroTitle || "",
               aboutUs: current.content?.aboutUs || "",
               gallery: current.content?.gallery || [""],
               testimonials: current.content?.testimonials || [{ name: "", text: "", stars: 5 }],
+              faqs: current.content?.faqs || [{ question: "", answer: "" }],
               menuBook: current.content?.menuBook || {
                 title: "Our Menu",
                 subtitle: "Freshly prepared with love",
@@ -326,6 +126,29 @@ export default function FullRestaurantEditor() {
   const removeMenuImage = (index: number) =>
     updateMenuBook("images", formData.content.menuBook.images.filter((_: any, i: number) => i !== index));
 
+  // --- FAQ Helpers ---
+  const addFaq = () =>
+    setFormData({ ...formData, content: { ...formData.content, faqs: [...formData.content.faqs, { question: "", answer: "" }] } });
+
+  const removeFaq = (index: number) =>
+    setFormData({ ...formData, content: { ...formData.content, faqs: formData.content.faqs.filter((_: any, i: number) => i !== index) } });
+
+  const updateFaq = (index: number, field: "question" | "answer", value: string) => {
+    const newFaqs = [...formData.content.faqs];
+    newFaqs[index] = { ...newFaqs[index], [field]: value };
+    setFormData({ ...formData, content: { ...formData.content, faqs: newFaqs } });
+  };
+
+  // --- ContactInfo Helpers ---
+  const updateContactInfo = (field: string, value: any) =>
+    setFormData({ ...formData, contactInfo: { ...formData.contactInfo, [field]: value } });
+
+  const updateHours = (field: "weekdays" | "weekends", value: string) =>
+    setFormData({ ...formData, contactInfo: { ...formData.contactInfo, hours: { ...(formData.contactInfo as any).hours, [field]: value } } });
+
+  const updateSocial = (field: "instagram" | "facebook" | "twitter", value: string) =>
+    setFormData({ ...formData, contactInfo: { ...formData.contactInfo, social: { ...(formData.contactInfo as any).social, [field]: value } } });
+
   const handleMenuImageUpload = (file: File) => {
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -338,11 +161,11 @@ export default function FullRestaurantEditor() {
     setSaving(true);
     try {
       const token = localStorage.getItem("token");
-      await axios.patch(`http://localhost:5000/api/restaurants/${id}`, formData, {
+      await axios.patch(`/api/restaurants/${id}`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert("Website Updated Successfully!");
-    } catch (err) { alert("Failed to save."); } finally { setSaving(false); }
+      toast.success("Website Updated Successfully!");
+    } catch (err) { toast.error("Failed to save."); } finally { setSaving(false); }
   };
 
   if (loading) return (
@@ -355,6 +178,7 @@ export default function FullRestaurantEditor() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
+      <ToastContainer position="top-right" autoClose={3000} />
       <nav className="sticky top-0 z-50 bg-white border-b px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button onClick={() => router.push('/dashboard')} className="p-2 hover:bg-slate-100 rounded-full">
@@ -382,14 +206,41 @@ export default function FullRestaurantEditor() {
                   <input className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none" placeholder="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                 </div>
                 <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 ml-1">Tagline</label>
+                  <input className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none" placeholder="e.g. Crafted with love, served with care" value={formData.tagline} onChange={(e) => setFormData({ ...formData, tagline: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-500 ml-1">Hero Title</label>
-                  <input className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none" placeholder="Hero Title" value={formData.content.heroTitle} onChange={(e) => setFormData({ ...formData, content: { ...formData.content, heroTitle: e.target.value } })} />
+                  <input className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none" placeholder="Hero Title (defaults to restaurant name)" value={formData.content.heroTitle} onChange={(e) => setFormData({ ...formData, content: { ...formData.content, heroTitle: e.target.value } })} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 ml-1">Logo URL</label>
+                  <input className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none" placeholder="https://your-logo.png" value={formData.logo ??""} onChange={(e) => setFormData({ ...formData, logo: e.target.value })} />
                 </div>
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-500 ml-1">Cover Image URL</label>
                 <input className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none" placeholder="https://..." value={formData.coverImage} onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })} />
               </div>
+            </div>
+          </section>
+
+          {/* About Us */}
+          <section className="bg-white p-8 rounded-3xl shadow-sm border">
+            <h2 className="text-sm font-black uppercase text-slate-400 mb-6 flex items-center gap-2">
+              <AlignLeft size={16} /> About Us
+            </h2>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-500 ml-1">Your Story</label>
+              <textarea
+                className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none h-32 resize-none text-sm"
+                placeholder="Tell your guests about your restaurant — history, chef, inspiration, what makes you special..."
+                value={formData.content.aboutUs}
+                onChange={(e) => setFormData({ ...formData, content: { ...formData.content, aboutUs: e.target.value } })}
+              />
+              <p className="text-[10px] text-slate-400 ml-1">This appears as a dedicated "About Us" section on your site</p>
             </div>
           </section>
 
@@ -588,6 +439,141 @@ export default function FullRestaurantEditor() {
             </div>
           </section>
 
+          {/* Contact Info */}
+          <section className="bg-white p-8 rounded-3xl shadow-sm border">
+            <h2 className="text-sm font-black uppercase text-slate-400 mb-6 flex items-center gap-2">
+              <Phone size={16} /> Contact & Location
+            </h2>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 flex items-center gap-1 ml-1"><Phone size={11} /> Phone</label>
+                  <input
+                    className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none"
+                    placeholder="+1 (555) 000-0000"
+                    value={(formData.contactInfo as any).phone}
+                    onChange={(e) => updateContactInfo("phone", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 flex items-center gap-1 ml-1"><Mail size={11} /> Email</label>
+                  <input
+                    type="email"
+                    className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none"
+                    placeholder="hello@yourrestaurant.com"
+                    value={(formData.contactInfo as any).email}
+                    onChange={(e) => updateContactInfo("email", e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 flex items-center gap-1 ml-1"><MapPin size={11} /> Address</label>
+                <input
+                  className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none"
+                  placeholder="123 Culinary Ave, Food District, City"
+                  value={(formData.contactInfo as any).address}
+                  onChange={(e) => updateContactInfo("address", e.target.value)}
+                />
+              </div>
+              {/* Opening Hours */}
+              <div>
+                <label className="text-xs font-bold text-slate-500 flex items-center gap-1 ml-1 mb-3"><Clock size={11} /> Opening Hours</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-slate-400 ml-1 uppercase">Mon — Fri</label>
+                    <input
+                      className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none text-sm"
+                      placeholder="11:00 - 22:00"
+                      value={(formData.contactInfo as any).hours?.weekdays}
+                      onChange={(e) => updateHours("weekdays", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-slate-400 ml-1 uppercase">Sat — Sun</label>
+                    <input
+                      className="w-full p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none text-sm"
+                      placeholder="09:00 - 23:00"
+                      value={(formData.contactInfo as any).hours?.weekends}
+                      onChange={(e) => updateHours("weekends", e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+              {/* Social Links */}
+              <div>
+                <label className="text-xs font-bold text-slate-500 flex items-center gap-1 ml-1 mb-3"><Globe size={11} /> Social Media Links</label>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase w-20 shrink-0">Instagram</span>
+                    <input
+                      className="flex-1 p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none text-sm"
+                      placeholder="https://instagram.com/yourpage"
+                      value={(formData.contactInfo as any).social?.instagram}
+                      onChange={(e) => updateSocial("instagram", e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase w-20 shrink-0">Facebook</span>
+                    <input
+                      className="flex-1 p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none text-sm"
+                      placeholder="https://facebook.com/yourpage"
+                      value={(formData.contactInfo as any).social?.facebook}
+                      onChange={(e) => updateSocial("facebook", e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase w-20 shrink-0">Twitter/X</span>
+                    <input
+                      className="flex-1 p-3 bg-slate-50 border rounded-xl focus:ring-2 ring-orange-100 outline-none text-sm"
+                      placeholder="https://twitter.com/yourpage"
+                      value={(formData.contactInfo as any).social?.twitter}
+                      onChange={(e) => updateSocial("twitter", e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* FAQs */}
+          <section className="bg-white p-8 rounded-3xl shadow-sm border">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-sm font-black uppercase text-slate-400 flex items-center gap-2">
+                <HelpCircle size={16} /> FAQs
+              </h2>
+              <button onClick={addFaq} className="flex items-center gap-1 text-xs font-bold bg-orange-50 text-orange-600 px-3 py-1.5 rounded-lg hover:bg-orange-100 transition">
+                <Plus size={14} /> Add FAQ
+              </button>
+            </div>
+            <div className="space-y-4">
+              {formData.content.faqs.map((faq: any, idx: number) => (
+                <div key={idx} className="relative space-y-3 p-5 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl">
+                  <button onClick={() => removeFaq(idx)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition">
+                    <Trash2 size={18} />
+                  </button>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Question</label>
+                    <input
+                      className="w-full p-2 bg-white border rounded-lg outline-none text-sm"
+                      placeholder="e.g. Do you take walk-ins?"
+                      value={faq.question}
+                      onChange={(e) => updateFaq(idx, "question", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Answer</label>
+                    <textarea
+                      className="w-full p-2 bg-white border rounded-lg outline-none h-20 resize-none text-sm"
+                      placeholder="Yes, we accept walk-ins based on availability..."
+                      value={faq.answer}
+                      onChange={(e) => updateFaq(idx, "answer", e.target.value)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
           {/* Testimonials */}
           <section className="bg-white p-8 rounded-3xl shadow-sm border">
             <div className="flex items-center justify-between mb-6">
@@ -626,6 +612,8 @@ export default function FullRestaurantEditor() {
 
         {/* Sidebar */}
         <div className="lg:col-span-4 space-y-6">
+
+          {/* Brand Color */}
           <section className="bg-white p-6 rounded-3xl shadow-sm border">
             <h2 className="text-sm font-black uppercase text-slate-400 mb-4 flex items-center gap-2">
               <Palette size={16} /> Brand Color
@@ -636,25 +624,58 @@ export default function FullRestaurantEditor() {
             </div>
           </section>
 
-          {/* ✅ Menu Book Quick Info */}
+          {/* Publish toggle */}
+          <section className="bg-white p-6 rounded-3xl shadow-sm border">
+            <h2 className="text-sm font-black uppercase text-slate-400 mb-4 flex items-center gap-2">
+              <Eye size={16} /> Visibility
+            </h2>
+            <label className="flex items-center justify-between cursor-pointer">
+              <div>
+                <p className="text-sm font-bold text-slate-800">{formData.isPublished ? "Published" : "Draft"}</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">{formData.isPublished ? "Your site is live and visible to guests" : "Hidden from public view"}</p>
+              </div>
+              <div
+                onClick={() => setFormData({ ...formData, isPublished: !formData.isPublished })}
+                className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${formData.isPublished ? "bg-green-500" : "bg-slate-300"}`}
+              >
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${formData.isPublished ? "left-7" : "left-1"}`} />
+              </div>
+            </label>
+          </section>
+
+          {/* Site summary */}
           <section className="bg-orange-50 p-6 rounded-3xl border border-orange-100">
             <h2 className="text-sm font-black uppercase text-orange-400 mb-4 flex items-center gap-2">
-              <BookOpen size={16} /> Menu Book Status
+              <BookOpen size={16} /> Site Summary
             </h2>
             <div className="space-y-2 text-xs text-slate-600">
               <div className="flex justify-between">
-                <span className="text-slate-500">Images</span>
-                <span className="font-bold">{menuBook.images.filter((i: string) => i).length} added</span>
+                <span className="text-slate-500">Menu images</span>
+                <span className="font-bold">{menuBook.images.filter((i: string) => i).length}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">PDF</span>
+                <span className="text-slate-500">Menu PDF</span>
                 <span className={`font-bold ${menuBook.pdfUrl ? "text-green-600" : "text-slate-400"}`}>
                   {menuBook.pdfUrl ? "Linked ✓" : "None"}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Style</span>
-                <span className="font-bold capitalize">{menuBook.style}</span>
+                <span className="text-slate-500">Gallery images</span>
+                <span className="font-bold">{formData.content.gallery.filter((g: string) => g).length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Reviews</span>
+                <span className="font-bold">{formData.content.testimonials.filter((t: any) => t.name).length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">FAQs</span>
+                <span className="font-bold">{formData.content.faqs.filter((f: any) => f.question).length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">About Us</span>
+                <span className={`font-bold ${formData.content.aboutUs ? "text-green-600" : "text-slate-400"}`}>
+                  {formData.content.aboutUs ? "Written ✓" : "Empty"}
+                </span>
               </div>
             </div>
           </section>

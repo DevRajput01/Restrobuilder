@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import axios from "@/lib/axios";
 import { 
   Plus, Globe, Utensils, Layout, LogOut, Settings, 
-  ShieldCheck, Star, Crown, Menu, Contact, TicketSlashIcon ,CalendarDays 
+  ShieldCheck, Star, Crown, Menu, ShoppingBag, TicketSlashIcon, CalendarDays
 } from "lucide-react";
 import Image from "next/image";
 
@@ -14,6 +14,8 @@ interface Restaurant {
   name: string;
   slug: string;
   tagline: string;
+  coverImage?: string;
+  logo?: string;
   _count: {
     pages: number;
     menuItems: number;
@@ -46,14 +48,14 @@ export default function UserDashboard() {
         //   headers: { Authorization: `Bearer ${token}` }
         // });
         // setRestaurants(res.data);
-        const res = await axios.get("http://localhost:5000/api/my-restaurants", {
+        const res = await axios.get("/api/my-restaurants", {
   headers: { Authorization: `Bearer ${token}` }
 });
 setRestaurants(res.data);
 
-// ✅ fetch pending bookings count
+// fetch pending bookings count
 try {
-  const bookingRes = await axios.get("http://localhost:5000/api/my-bookings", {
+  const bookingRes = await axios.get("/api/my-bookings", {
     headers: { Authorization: `Bearer ${token}` }
   });
   const pending = bookingRes.data.bookings.filter((b: any) => b.status === "PENDING").length;
@@ -139,8 +141,15 @@ try {
   )}
 </button>
 
-          <button className="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 transition">
-            <Contact size={20} /> <span className="hidden md:block">Update Contact</span>
+          <button
+            // onClick={() => {
+            //   const first = restaurants[0];
+            //   if (first) router.push(`/dashboard/edit/${first.id}`);
+            //   else alert("Create a restaurant first!");
+            // }}
+            className="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 transition"
+          >
+            <ShoppingBag size={20} /> <span className="hidden md:block">Online Order</span>
           </button>
           <button className="w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 transition">
             <TicketSlashIcon size={20} /> <span className="hidden md:block">Testimonials</span>
@@ -179,10 +188,28 @@ try {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {restaurants.map((res) => (
               <div key={res.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition group overflow-hidden">
-                <div className="h-32 bg-slate-100 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                  <div className="absolute bottom-4 left-6 bg-white p-2 rounded-lg shadow-sm">
-                    <Utensils className="text-orange-600" size={20} />
+                <div className="h-40 relative overflow-hidden bg-slate-100">
+                  {res.coverImage ? (
+                    <img
+                      src={res.coverImage}
+                      alt={res.name}
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
+                      <Utensils size={36} className="text-slate-400" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                  {/* Logo / icon badge */}
+                  <div className="absolute bottom-3 left-4">
+                    {res.logo ? (
+                      <img src={res.logo} alt="logo" className="w-10 h-10 rounded-xl object-contain bg-white shadow-md p-1" />
+                    ) : (
+                      <div className="bg-white p-2 rounded-xl shadow-md">
+                        <Utensils className="text-orange-600" size={18} />
+                      </div>
+                    )}
                   </div>
                 </div>
                 

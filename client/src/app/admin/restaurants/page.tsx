@@ -1,11 +1,40 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import axios from "@/lib/axios";
 import { Utensils, AlertCircle, ExternalLink } from "lucide-react";
 
+const PAGE_LIMIT = 10;
+
+type AdminRestaurant = {
+  id: string;
+  name: string;
+  slug: string;
+  isPublished: boolean;
+  createdAt: string;
+  user?: {
+    name: string | null;
+    email: string;
+  } | null;
+};
+
+type ErrorWithResponse = {
+  response?: {
+    status?: number;
+  };
+};
+
+const hasStatus = (error: unknown, status: number) =>
+  typeof error === "object" &&
+  error !== null &&
+  "response" in error &&
+  (error as ErrorWithResponse).response?.status === status;
+
 export default function AdminRestaurantsPage() {
-  const [restaurants, setRestaurants] = useState<any[]>([]);
+  const [restaurants, setRestaurants] = useState<AdminRestaurant[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRestaurants, setTotalRestaurants] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -16,12 +45,16 @@ export default function AdminRestaurantsPage() {
       if (!token) { router.push("/login"); return; }
 
       try {
-        const res = await axios.get("http://localhost:5000/api/admin/restaurants", {
+        setLoading(true);
+        const res = await axios.get("/api/admin/restaurants", {
           headers: { Authorization: `Bearer ${token}` },
+          params: { page: currentPage, limit: PAGE_LIMIT },
         });
         setRestaurants(res.data.restaurants);
-      } catch (err: any) {
-        if (err.response?.status === 403) {
+        setTotalPages(res.data.pagination?.totalPages ?? 1);
+        setTotalRestaurants(res.data.pagination?.total ?? res.data.restaurants.length);
+      } catch (err: unknown) {
+        if (hasStatus(err, 403)) {
           setError("Access Denied: Admins only.");
         } else {
           router.push("/login");
@@ -31,7 +64,7 @@ export default function AdminRestaurantsPage() {
       }
     };
     fetchRestaurants();
-  }, [router]);
+  }, [router, currentPage]);
 
   if (loading) {
     return (
@@ -62,7 +95,7 @@ export default function AdminRestaurantsPage() {
         <Utensils className="w-7 h-7 text-orange-600" />
         <h1 className="text-2xl font-extrabold text-slate-900">All Restaurants</h1>
         <span className="ml-auto bg-orange-50 text-orange-600 text-sm font-bold px-3 py-1 rounded-full">
-          {restaurants.length} total
+          {totalRestaurants} total
         </span>
       </div>
 
@@ -87,9 +120,9 @@ export default function AdminRestaurantsPage() {
                 </td>
               </tr>
             ) : (
-              restaurants.map((r: any, index: number) => (
+              restaurants.map((r: AdminRestaurant, index: number) => (
                 <tr key={r.id} className="hover:bg-slate-50 transition">
-                  <td className="px-6 py-4 text-slate-400">{index + 1}</td>
+                  <td className="px-6 py-4 text-slate-400">{(currentPage - 1) * PAGE_LIMIT + index + 1}</td>
                   <td className="px-6 py-4 font-semibold text-slate-900">{r.name}</td>
                   <td className="px-6 py-4 text-slate-500">{r.user?.name ?? "—"}</td>
                   <td className="px-6 py-4 text-slate-400 font-mono text-xs">{r.slug}</td>
@@ -121,6 +154,25 @@ export default function AdminRestaurantsPage() {
             )}
           </tbody>
         </table>
+        <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
+          <button
+            onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+            disabled={currentPage === 1 || loading}
+            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Prev
+          </button>
+          <span className="text-sm font-semibold text-slate-500">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage((page) => Math.min(page + 1, totalPages))}
+            disabled={currentPage === totalPages || loading}
+            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ import adminRoutes from './routes/admin';
 
 const app = express();
 const prisma = new PrismaClient();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 setInterval(async () => {
   try {
     await prisma.$queryRaw`SELECT 1`;

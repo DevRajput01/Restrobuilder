@@ -1,11 +1,43 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import axios from "@/lib/axios";
 import { Users, AlertCircle } from "lucide-react";
 
+const PAGE_LIMIT = 10;
+
+type RestaurantSummary = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type AdminUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  restaurants?: RestaurantSummary[];
+};
+
+type ErrorWithResponse = {
+  response?: {
+    status?: number;
+  };
+};
+
+const hasStatus = (error: unknown, status: number) =>
+  typeof error === "object" &&
+  error !== null &&
+  "response" in error &&
+  (error as ErrorWithResponse).response?.status === status;
+
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -16,12 +48,16 @@ export default function AdminUsersPage() {
       if (!token) { router.push("/login"); return; }
 
       try {
-        const res = await axios.get("http://localhost:5000/api/admin/users", {
+        setLoading(true);
+        const res = await axios.get("/api/admin/users", {
           headers: { Authorization: `Bearer ${token}` },
+          params: { page: currentPage, limit: PAGE_LIMIT },
         });
         setUsers(res.data.users);
-      } catch (err: any) {
-        if (err.response?.status === 403) {
+        setTotalPages(res.data.pagination?.totalPages ?? 1);
+        setTotalUsers(res.data.pagination?.total ?? res.data.users.length);
+      } catch (err: unknown) {
+        if (hasStatus(err, 403)) {
           setError("Access Denied: Admins only.");
         } else {
           router.push("/login");
@@ -31,7 +67,7 @@ export default function AdminUsersPage() {
       }
     };
     fetchUsers();
-  }, [router]);
+  }, [router, currentPage]);
 
   if (loading) {
     return (
@@ -62,7 +98,7 @@ export default function AdminUsersPage() {
         <Users className="w-7 h-7 text-blue-600" />
         <h1 className="text-2xl font-extrabold text-slate-900">All Users</h1>
         <span className="ml-auto bg-blue-50 text-blue-600 text-sm font-bold px-3 py-1 rounded-full">
-          {users.length} total
+          {totalUsers} total
         </span>
       </div>
 
@@ -86,9 +122,9 @@ export default function AdminUsersPage() {
                 </td>
               </tr>
             ) : (
-              users.map((user: any, index: number) => (
-                <tr key={user.id} className="hover:bg-slate-50 transition"> {/* ✅ fixed: user.id */}
-                  <td className="px-6 py-4 text-slate-400">{index + 1}</td>
+              users.map((user: AdminUser, index: number) => (
+                <tr key={user.id} className="hover:bg-slate-50 transition">
+                  <td className="px-6 py-4 text-slate-400">{(currentPage - 1) * PAGE_LIMIT + index + 1}</td>
                   <td className="px-6 py-4 font-semibold text-slate-900">{user.name}</td>
                   <td className="px-6 py-4">{user.email}</td>
                   <td className="px-6 py-4">
@@ -104,9 +140,9 @@ export default function AdminUsersPage() {
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
-                    {user.restaurants?.length > 0 ? (
+                    {(user.restaurants?.length ?? 0) > 0 ? (
                       <div className="flex flex-col gap-1">
-                        {user.restaurants.map((r: any) => (
+                        {user.restaurants?.map((r: RestaurantSummary) => (
                           <a
                             key={r.id}
                             href={`http://localhost:3000/view/${r.slug}`}
@@ -126,6 +162,25 @@ export default function AdminUsersPage() {
             )}
           </tbody>
         </table>
+        <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
+          <button
+            onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+            disabled={currentPage === 1 || loading}
+            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Prev
+          </button>
+          <span className="text-sm font-semibold text-slate-500">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage((page) => Math.min(page + 1, totalPages))}
+            disabled={currentPage === totalPages || loading}
+            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

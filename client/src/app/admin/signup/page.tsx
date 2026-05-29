@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Image from "next/image";
+import axios from "@/lib/axios";
 
 const adminSignupSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -25,21 +26,11 @@ export default function AdminSignup() {
   const onSubmit = async (data: AdminSignupData) => {
     setServerError("");
     try {
-      const res = await fetch("http://localhost:5000/api/admin/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-
-      if (res.ok) {
-        localStorage.setItem("token", result.token);
-        router.push("/admin"); // Redirect to Dashboard
-      } else {
-        setServerError(result.error || "Signup failed");
-      }
-    } catch (err) {
-      setServerError("Connection failed. Is the backend running?");
+      const { data: result } = await axios.post("/api/admin/signup", data);
+      localStorage.setItem("token", result.token);
+      router.push("/admin");
+    } catch (err: any) {
+      setServerError(err.response?.data?.error || "Connection failed. Is the backend running?");
     }
   };
 

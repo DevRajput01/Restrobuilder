@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-import { CalendarDays, Clock, Check, X, Users, MessageSquare, Phone, Mail } from "lucide-react";
+import axios from "@/lib/axios";
+import { CalendarDays, Clock, Check, X, Users, MessageSquare, Phone, Mail, ArrowLeft } from "lucide-react";
 
 const statusColors: any = {
   PENDING:   "bg-amber-100 text-amber-600 border-amber-200",
@@ -28,7 +28,7 @@ export default function OwnerBookingsPage() {
       if (!token) { router.push("/login"); return; }
 
       try {
-        const res = await axios.get("http://localhost:5000/api/my-bookings", {
+        const res = await axios.get("/api/my-bookings", {
           headers: { Authorization: `Bearer ${token}` }
         });
         setBookings(res.data.bookings);
@@ -44,7 +44,7 @@ export default function OwnerBookingsPage() {
   const updateStatus = async (bookingId: string, status: string) => {
     const token = localStorage.getItem("token");
     try {
-      await axios.patch(`http://localhost:5000/api/my-bookings/${bookingId}`,
+      await axios.patch(`/api/my-bookings/${bookingId}`,
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -71,6 +71,10 @@ export default function OwnerBookingsPage() {
 
       {/* Header */}
       <div className="mb-8 flex flex-col md:flex-row md:items-center gap-4">
+
+        <button onClick={() => router.back()} className="p-2 bg-white rounded-full shadow-sm hover:bg-slate-100 transition">
+              <ArrowLeft size={20} />
+            </button>
         <div className="flex items-center gap-3">
           <CalendarDays className="w-7 h-7 text-orange-600" />
           <div>

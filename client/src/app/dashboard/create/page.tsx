@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import axios from "@/lib/axios";
 import { Utensils, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 
@@ -21,7 +21,7 @@ export default function CreateRestaurant() {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/restaurants",
+        "/api/restaurants",
         { name, tagline },
         { headers: { Authorization: `Bearer ${token}` } }
       );
