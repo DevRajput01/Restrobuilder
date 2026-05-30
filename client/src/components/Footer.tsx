@@ -1,72 +1,3 @@
-// import Image from "next/image";
-// import Link from "next/link";
-
-// export default function Footer() {
-//   return (
-//     <footer className="bg-white border-t pt-16 pb-8">
-//       <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 mb-12">
-//         {/* Brand Section */}
-//         <div className="col-span-2 md:col-span-1">
-//           <div className="flex items-center gap-2 mb-4">
-//             <Image 
-//               src="/logo/logo.png" 
-//               alt="RestroBuilder Logo" 
-//               width={32} 
-//               height={32} 
-//             />
-//             <span className="font-bold text-slate-900 text-lg">RestroBuilder</span>
-//           </div>
-//           <p className="text-slate-500 text-sm leading-relaxed max-w-[200px]">
-//             The easiest way for restaurants to create beautiful, professional websites.
-//           </p>
-//         </div>
-
-//         {/* Product Section */}
-//         <div>
-//           <h3 className="font-bold text-slate-900 mb-6">Product</h3>
-//           <ul className="text-slate-500 space-y-4 text-sm">
-//             <li><Link href="#" className="hover:text-orange-600 transition-colors">Templates</Link></li>
-//             <li><Link href="#" className="hover:text-orange-600 transition-colors">Pricing</Link></li>
-//             <li><Link href="#" className="hover:text-orange-600 transition-colors">Features</Link></li>
-//             <li><Link href="#" className="hover:text-orange-600 transition-colors">Changelog</Link></li>
-//           </ul>
-//         </div>
-
-//         {/* Company Section */}
-//         <div>
-//           <h3 className="font-bold text-slate-900 mb-6">Company</h3>
-//           <ul className="text-slate-500 space-y-4 text-sm">
-//             <li><Link href="#" className="hover:text-orange-600 transition-colors">About</Link></li>
-//             <li><Link href="#" className="hover:text-orange-600 transition-colors">Blog</Link></li>
-//             <li><Link href="#" className="hover:text-orange-600 transition-colors">Careers</Link></li>
-//             <li><Link href="#" className="hover:text-orange-600 transition-colors">Contact</Link></li>
-//           </ul>
-//         </div>
-
-//         {/* Legal Section */}
-//         <div>
-//           <h3 className="font-bold text-slate-900 mb-6">Legal</h3>
-//           <ul className="text-slate-500 space-y-4 text-sm">
-//             <li><Link href="#" className="hover:text-orange-600 transition-colors">Privacy Policy</Link></li>
-//             <li><Link href="#" className="hover:text-orange-600 transition-colors">Terms of Service</Link></li>
-//             <li><Link href="#" className="hover:text-orange-600 transition-colors">Cookie Policy</Link></li>
-//           </ul>
-//         </div>
-//       </div>
-
-//       {/* Bottom Copyright Section */}
-//       <div className="border-t border-slate-100 pt-8 text-center">
-//         <p className="text-slate-400 text-sm">
-//           &copy; 2026 RestroBuilder. All rights reserved.
-//         </p>
-//         <div>
-//           <p>Owner Social media</p>
-//           add hear insta github linkdin social media account of owner
-//         </div>
-//       </div>
-//     </footer>
-//   );
-// }
 
 import Image from "next/image";
 import Link from "next/link";
@@ -87,7 +18,7 @@ export default function Footer() {
         <div className="col-span-2 md:col-span-1">
           <div className="flex items-center gap-2 mb-4">
             <Image 
-              src="/logo/logo.png" 
+              src="/logo/logo1.png" 
               alt="RestroBuilder Logo" 
               width={32} 
               height={32} 
